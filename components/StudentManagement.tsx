@@ -12,18 +12,18 @@ import DailyQuickNotes from './DailyQuickNotes';
 const StudentManagement: React.FC = () => {
     const { apiKey, selectedModel, setIsSettingsOpen } = useApiKey();
     const { user } = useAuth();
-    
+
     // Core State
     const [students, setStudents] = useState<Student[]>([]);
     const [analysisResults, setAnalysisResults] = useState<Record<string, string>>({});
-    
+
     // UI State
     const [analyzingFile, setAnalyzingFile] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'upload' | 'folders' | 'class_detail' | 'student_detail' | 'quick_consult' | 'advanced_management' | 'daily_notes'>('upload');
     const [advancedModule, setAdvancedModule] = useState<'discipline' | 'special' | 'seating' | 'committee' | null>(null);
-    
+
     // Advanced Management State
     const [advancedLoading, setAdvancedLoading] = useState(false);
     const [advancedResult, setAdvancedResult] = useState('');
@@ -91,7 +91,7 @@ const StudentManagement: React.FC = () => {
 
     const saveClassToStorage = () => {
         if (students.length === 0) return;
-        
+
         // Determine class name
         const classNameRaw = students[0].className || 'Unknown';
         const year = new Date().getFullYear();
@@ -102,7 +102,7 @@ const StudentManagement: React.FC = () => {
         }
 
         const folderName = `Lớp ${classNameRaw} - ${birthYear ? birthYear : year}`;
-        
+
         const newClass: SavedClass = {
             id: Date.now().toString(),
             name: folderName,
@@ -113,7 +113,7 @@ const StudentManagement: React.FC = () => {
 
         const updated = [...savedClasses, newClass];
         updateStorage(updated);
-        
+
         // Switch view
         setViewMode('folders');
         setStudents([]);
@@ -122,16 +122,16 @@ const StudentManagement: React.FC = () => {
     };
 
     const deleteClass = (e: React.MouseEvent, classId: string) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         e.preventDefault();
-        
+
         const clsToDelete = savedClasses.find(c => c.id === classId);
         const confirmMsg = `XÁC NHẬN XÓA LỚP:\n\nBạn có chắc chắn muốn xóa hồ sơ "${clsToDelete?.name}" không?\n\nHành động này sẽ xóa vĩnh viễn dữ liệu của lớp này và không thể hoàn tác.`;
 
         if (window.confirm(confirmMsg)) {
             const updatedClasses = savedClasses.filter(c => c.id !== classId);
             updateStorage(updatedClasses);
-            
+
             // Nếu lớp đang chọn bị xóa, reset state và quay về view folders
             if (selectedClassId === classId) {
                 setSelectedClassId(null);
@@ -225,18 +225,18 @@ const StudentManagement: React.FC = () => {
                         // Create a formatted note string: [Date] [Type]: Content
                         const dateParts = note.date.split('-'); // YYYY-MM-DD
                         const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
-                        
-                        const typeLabel = note.type === 'violation' ? 'Vi phạm' : 
-                                          note.type === 'reward' ? 'Khen thưởng' :
-                                          note.type === 'academic' ? 'Học tập' :
-                                          note.type === 'parent_contact' ? 'Liên hệ PH' :
-                                          note.type === 'psychology' ? 'Tâm lý' : 'Ghi chú';
-                        
+
+                        const typeLabel = note.type === 'violation' ? 'Vi phạm' :
+                            note.type === 'reward' ? 'Khen thưởng' :
+                                note.type === 'academic' ? 'Học tập' :
+                                    note.type === 'parent_contact' ? 'Liên hệ PH' :
+                                        note.type === 'psychology' ? 'Tâm lý' : 'Ghi chú';
+
                         const newEntry = `[${formattedDate}] ${typeLabel}: ${note.content}`;
-                        
+
                         // Append to 'notes' field
                         const currentNotes = std.notes ? std.notes + '\n\n' : '';
-                        
+
                         return { ...std, notes: currentNotes + newEntry };
                     }
                     return std;
@@ -245,7 +245,7 @@ const StudentManagement: React.FC = () => {
             }
             return cls;
         });
-        
+
         updateStorage(updatedClasses);
     };
 
@@ -258,7 +258,7 @@ const StudentManagement: React.FC = () => {
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if(!apiKey) {
+        if (!apiKey) {
             setIsSettingsOpen(true);
             e.target.value = "";
             return;
@@ -278,7 +278,7 @@ const StudentManagement: React.FC = () => {
             if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
                 extractedStudents = await processExcelFile(file);
             } else if (file.name.endsWith('.pdf') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-                 extractedStudents = await processPdfFile(file); 
+                extractedStudents = await processPdfFile(file);
             } else {
                 throw new Error("Định dạng file không được hỗ trợ.");
             }
@@ -323,9 +323,9 @@ const StudentManagement: React.FC = () => {
                 try {
                     const base64String = (event.target?.result as string).split(',')[1];
                     let mimeType = file.type;
-                    if(!mimeType) {
-                        if(file.name.endsWith('.pdf')) mimeType = 'application/pdf';
-                        else if(file.name.endsWith('.docx')) mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                    if (!mimeType) {
+                        if (file.name.endsWith('.pdf')) mimeType = 'application/pdf';
+                        else if (file.name.endsWith('.docx')) mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
                     }
                     const results = await extractStudentListFromFiles(base64String, mimeType, apiKey, selectedModel);
                     resolve(results);
@@ -346,14 +346,14 @@ const StudentManagement: React.FC = () => {
             return;
         }
 
-        if(!apiKey) { setIsSettingsOpen(true); return; }
+        if (!apiKey) { setIsSettingsOpen(true); return; }
         setIsAnalyzing(true);
-        
+
         for (const student of students) {
             if (analysisResults[student.id]) continue;
             try {
                 const result = await generatePersonalityAnalysis(student, apiKey, selectedModel);
-                setAnalysisResults(prev => ({...prev, [student.id]: result}));
+                setAnalysisResults(prev => ({ ...prev, [student.id]: result }));
             } catch (err) {
                 console.error(err);
             }
@@ -363,36 +363,36 @@ const StudentManagement: React.FC = () => {
     };
 
     const handleDownloadWord = () => {
-         let currentStds = students;
-         let currentAnls = analysisResults;
-         let clsName = "Moi";
+        let currentStds = students;
+        let currentAnls = analysisResults;
+        let clsName = "Moi";
 
-         if (viewMode === 'class_detail' && selectedClassId) {
-             const cls = savedClasses.find(c => c.id === selectedClassId);
-             if (cls) {
-                 currentStds = cls.students;
-                 currentAnls = cls.analysisResults;
-                 clsName = cls.name;
-             }
-         }
+        if (viewMode === 'class_detail' && selectedClassId) {
+            const cls = savedClasses.find(c => c.id === selectedClassId);
+            if (cls) {
+                currentStds = cls.students;
+                currentAnls = cls.analysisResults;
+                clsName = cls.name;
+            }
+        }
 
-         if (currentStds.length === 0) return;
-         exportStudentAnalysesToDocx(currentStds, currentAnls, clsName);
+        if (currentStds.length === 0) return;
+        exportStudentAnalysesToDocx(currentStds, currentAnls, clsName);
     };
 
     // --- LOGIC FOR SAVED STUDENT CONSULTATION ---
     const handleSolveProblem = async () => {
         if (!apiKey || !teacherProblem.trim()) return;
         setIsSolving(true);
-        
+
         // Identify current student context
         let currentStudent: Student | undefined;
         let currentAnalysis = "";
 
         if (viewMode === 'student_detail' && selectedClassId && selectedStudentId) {
-             const cls = savedClasses.find(c => c.id === selectedClassId);
-             currentStudent = cls?.students.find(s => s.id === selectedStudentId);
-             currentAnalysis = cls?.analysisResults[selectedStudentId] || "";
+            const cls = savedClasses.find(c => c.id === selectedClassId);
+            currentStudent = cls?.students.find(s => s.id === selectedStudentId);
+            currentAnalysis = cls?.analysisResults[selectedStudentId] || "";
         }
 
         if (currentStudent) {
@@ -459,7 +459,7 @@ const StudentManagement: React.FC = () => {
             dob: quickDob,
             className: 'Tu_Van_Nhanh'
         };
-        exportStudentAnalysesToDocx([tempStudent], {[tempStudent.id]: quickAnalysis}, "Tu_Van_Nhanh");
+        exportStudentAnalysesToDocx([tempStudent], { [tempStudent.id]: quickAnalysis }, "Tu_Van_Nhanh");
     };
 
     // --- LOGIC FOR ADVANCED MODULES ---
@@ -473,12 +473,12 @@ const StudentManagement: React.FC = () => {
         }
 
         if (!apiKey) { setIsSettingsOpen(true); return; }
-        
+
         let targetStudents = students;
         // If we are viewing a saved class, use those students
         if (viewMode === 'advanced_management' && selectedClassId) {
-             const cls = savedClasses.find(c => c.id === selectedClassId);
-             if (cls) targetStudents = cls.students;
+            const cls = savedClasses.find(c => c.id === selectedClassId);
+            if (cls) targetStudents = cls.students;
         } else if (students.length === 0) {
             alert("Vui lòng tải lên danh sách học sinh hoặc chọn Lớp đã lưu trước!");
             return;
@@ -562,16 +562,16 @@ const StudentManagement: React.FC = () => {
     const renderFolderView = () => (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-2">
             {savedClasses.map(cls => (
-                <div 
-                    key={cls.id} 
+                <div
+                    key={cls.id}
                     className="relative group h-full hover:z-10 transition-all"
                 >
                     {/* The Card */}
-                    <div 
-                        onClick={() => { 
-                            setSelectedClassId(cls.id); 
-                            setSelectedStudentIdsForAction(new Set()); 
-                            if (viewMode !== 'advanced_management') setViewMode('class_detail'); 
+                    <div
+                        onClick={() => {
+                            setSelectedClassId(cls.id);
+                            setSelectedStudentIdsForAction(new Set());
+                            if (viewMode !== 'advanced_management') setViewMode('class_detail');
                         }}
                         className={`bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all p-5 cursor-pointer h-full flex flex-col justify-between
                             ${selectedClassId === cls.id ? 'border-teal-500 ring-2 ring-teal-500 bg-teal-50/50' : 'border-slate-200 hover:border-teal-300'}`}
@@ -582,9 +582,9 @@ const StudentManagement: React.FC = () => {
                                     <FolderOpen size={28} />
                                 </div>
                                 <div className="flex gap-2">
-                                    {selectedClassId === cls.id && <Award size={20} className="text-teal-600"/>}
+                                    {selectedClassId === cls.id && <Award size={20} className="text-teal-600" />}
                                     {/* Delete Button moved inside the card for better clickability */}
-                                    <button 
+                                    <button
                                         onClick={(e) => deleteClass(e, cls.id)}
                                         className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         title="Xóa lớp này"
@@ -594,16 +594,16 @@ const StudentManagement: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <h3 className="font-bold text-slate-800 text-lg mb-1 line-clamp-1" title={cls.name}>{cls.name}</h3>
                             <p className="text-xs text-slate-500 font-medium">{new Date(cls.createdAt).toLocaleDateString('vi-VN')}</p>
                         </div>
 
                         <div className="flex justify-between items-center text-sm text-slate-500 border-t border-slate-100 pt-4 mt-4">
-                             <span className="flex items-center gap-1.5 font-medium"><User size={16}/> {cls.students.length} Học sinh</span>
-                             <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-teal-600 group-hover:bg-teal-50 transition-colors">
+                            <span className="flex items-center gap-1.5 font-medium"><User size={16} /> {cls.students.length} Học sinh</span>
+                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-teal-600 group-hover:bg-teal-50 transition-colors">
                                 <ChevronRight size={18} />
-                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -637,21 +637,21 @@ const StudentManagement: React.FC = () => {
 
                 {/* Toolbar */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                     <button
+                    <button
                         onClick={() => setIsAddStudentModalOpen(true)}
                         className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg text-sm font-bold hover:bg-teal-700 transition"
                     >
                         <UserPlus size={16} /> Thêm HS
                     </button>
                     <button
-                         onClick={deleteSelectedStudents}
-                         disabled={selectedStudentIdsForAction.size === 0}
-                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition
+                        onClick={deleteSelectedStudents}
+                        disabled={selectedStudentIdsForAction.size === 0}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition
                          ${selectedStudentIdsForAction.size > 0 ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-slate-100 text-slate-400'}`}
                     >
                         <Trash2 size={16} /> Xóa ({selectedStudentIdsForAction.size})
                     </button>
-                     <button
+                    <button
                         onClick={handleDownloadWord}
                         className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition ml-auto"
                     >
@@ -693,7 +693,7 @@ const StudentManagement: React.FC = () => {
                                         <td className="px-4 py-3 text-slate-600">{s.dob || '-'}</td>
                                         <td className="px-4 py-3">
                                             {hasAnalysis ?
-                                                <span className="inline-flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded-full"><CheckCircle size={12}/> Đã có</span> :
+                                                <span className="inline-flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded-full"><CheckCircle size={12} /> Đã có</span> :
                                                 <span className="text-slate-400 text-xs italic">Chưa phân tích</span>
                                             }
                                         </td>
@@ -707,8 +707,8 @@ const StudentManagement: React.FC = () => {
                     </table>
                 </div>
 
-                 {/* Add Student Modal */}
-                 {isAddStudentModalOpen && (
+                {/* Add Student Modal */}
+                {isAddStudentModalOpen && (
                     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md animate-fade-in-up">
                             <h3 className="font-bold text-lg mb-4">Thêm học sinh mới</h3>
@@ -717,13 +717,13 @@ const StudentManagement: React.FC = () => {
                                     required
                                     placeholder="Họ và tên"
                                     value={newStudentData.name}
-                                    onChange={e => setNewStudentData({...newStudentData, name: e.target.value})}
+                                    onChange={e => setNewStudentData({ ...newStudentData, name: e.target.value })}
                                     className="w-full px-4 py-2 border rounded-lg"
                                 />
                                 <input
                                     placeholder="Ngày sinh (dd/mm/yyyy)"
                                     value={newStudentData.dob}
-                                    onChange={e => setNewStudentData({...newStudentData, dob: e.target.value})}
+                                    onChange={e => setNewStudentData({ ...newStudentData, dob: e.target.value })}
                                     className="w-full px-4 py-2 border rounded-lg"
                                 />
                                 <div className="flex justify-end gap-2 mt-4">
@@ -733,7 +733,7 @@ const StudentManagement: React.FC = () => {
                             </form>
                         </div>
                     </div>
-                 )}
+                )}
             </div>
         );
     };
@@ -760,8 +760,8 @@ const StudentManagement: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
                     {/* Left: Analysis */}
                     <div className="space-y-6">
-                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Sparkles className="text-purple-500"/> Phân tích Thần số học</h3>
+                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Sparkles className="text-purple-500" /> Phân tích Thần số học</h3>
                             {analysis ? (
                                 <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: analysis }} />
                             ) : (
@@ -769,13 +769,13 @@ const StudentManagement: React.FC = () => {
                                     <p>Chưa có dữ liệu phân tích.</p>
                                     <button
                                         onClick={async () => {
-                                            if(!apiKey) { setIsSettingsOpen(true); return; }
+                                            if (!apiKey) { setIsSettingsOpen(true); return; }
                                             const res = await generatePersonalityAnalysis(student, apiKey, selectedModel);
                                             // Simplistic update for local state
                                             const clsIdx = savedClasses.findIndex(c => c.id === selectedClassId);
-                                            if(clsIdx >= 0) {
-                                                const updatedCls = {...savedClasses[clsIdx]};
-                                                updatedCls.analysisResults = {...updatedCls.analysisResults, [student.id]: res};
+                                            if (clsIdx >= 0) {
+                                                const updatedCls = { ...savedClasses[clsIdx] };
+                                                updatedCls.analysisResults = { ...updatedCls.analysisResults, [student.id]: res };
                                                 const newClasses = [...savedClasses];
                                                 newClasses[clsIdx] = updatedCls;
                                                 updateStorage(newClasses);
@@ -787,13 +787,13 @@ const StudentManagement: React.FC = () => {
                                     </button>
                                 </div>
                             )}
-                         </div>
+                        </div>
                     </div>
 
                     {/* Right: Consultation */}
                     <div className="space-y-6">
                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm sticky top-0">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><MessageSquare className="text-blue-500"/> Trợ lý Sư phạm AI</h3>
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><MessageSquare className="text-blue-500" /> Trợ lý Sư phạm AI</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-bold text-slate-600 mb-1">Vấn đề cần tư vấn</label>
@@ -817,7 +817,7 @@ const StudentManagement: React.FC = () => {
 
                             {solution && (
                                 <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up">
-                                    <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2"><CheckCircle size={18}/> Giải pháp đề xuất</h4>
+                                    <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2"><CheckCircle size={18} /> Giải pháp đề xuất</h4>
                                     <div className="bg-green-50 p-4 rounded-xl text-sm text-slate-700 whitespace-pre-line leading-relaxed border border-green-100">
                                         {solution}
                                     </div>
@@ -844,7 +844,7 @@ const StudentManagement: React.FC = () => {
                     <div className="p-2 bg-purple-100 rounded-lg"><Zap size={24} /></div>
                     <h2 className="text-xl font-bold">Tư vấn Nhanh</h2>
                 </div>
-                
+
                 <form onSubmit={handleQuickConsult} className="space-y-4">
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">Họ tên học sinh</label>
@@ -869,8 +869,8 @@ const StudentManagement: React.FC = () => {
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">Loại vấn đề</label>
                         <div className="flex gap-2">
-                             <button type="button" onClick={() => setQuickType('violation')} className={`flex-1 py-2 rounded-lg font-bold text-sm ${quickType === 'violation' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-slate-50 text-slate-500'}`}>Xử lý Vi phạm</button>
-                             <button type="button" onClick={() => setQuickType('reward')} className={`flex-1 py-2 rounded-lg font-bold text-sm ${quickType === 'reward' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500'}`}>Khen thưởng</button>
+                            <button type="button" onClick={() => setQuickType('violation')} className={`flex-1 py-2 rounded-lg font-bold text-sm ${quickType === 'violation' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-slate-50 text-slate-500'}`}>Xử lý Vi phạm</button>
+                            <button type="button" onClick={() => setQuickType('reward')} className={`flex-1 py-2 rounded-lg font-bold text-sm ${quickType === 'reward' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500'}`}>Khen thưởng</button>
                         </div>
                     </div>
                     <div>
@@ -907,21 +907,21 @@ const StudentManagement: React.FC = () => {
                 {quickAnalysis && (
                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm animate-fade-in-up">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-slate-800 flex items-center gap-2"><User size={20} className="text-teal-600"/> Phân tích Hồ sơ Tâm lý</h3>
-                            <button onClick={handleDownloadQuickAnalysis} className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"><Download size={12}/> Lưu hồ sơ</button>
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2"><User size={20} className="text-teal-600" /> Phân tích Hồ sơ Tâm lý</h3>
+                            <button onClick={handleDownloadQuickAnalysis} className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"><Download size={12} /> Lưu hồ sơ</button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dangerouslySetInnerHTML={{ __html: quickAnalysis }} />
                     </div>
                 )}
 
                 {quickSolution && (
-                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-                        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Lightbulb size={20} className="text-yellow-500"/> Giải pháp Đề xuất</h3>
+                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Lightbulb size={20} className="text-yellow-500" /> Giải pháp Đề xuất</h3>
                         <div className="prose prose-sm max-w-none text-slate-700 bg-yellow-50/50 p-4 rounded-xl border border-yellow-100">
-                             <div style={{whiteSpace: 'pre-line'}}>{quickSolution}</div>
+                            <div style={{ whiteSpace: 'pre-line' }}>{quickSolution}</div>
                         </div>
                         <div className="mt-4 flex justify-end">
-                            <button 
+                            <button
                                 onClick={() => exportSolutionToDocx(quickName, quickIssue, quickSolution)}
                                 className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm"
                             >
@@ -936,28 +936,28 @@ const StudentManagement: React.FC = () => {
 
     const renderAdvancedManagementView = () => (
         <div className="h-full flex flex-col animate-fade-in">
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
-                 {[
-                     { id: 'discipline', label: 'Xử lý Kỷ luật', icon: <Gavel size={20}/>, color: 'bg-red-100 text-red-700' },
-                     { id: 'special', label: 'Tình huống Đặc biệt', icon: <ShieldAlert size={20}/>, color: 'bg-orange-100 text-orange-700' },
-                     { id: 'seating', label: 'Sơ đồ Lớp học', icon: <Grid size={20}/>, color: 'bg-blue-100 text-blue-700' },
-                     { id: 'committee', label: 'Ban Cán sự', icon: <Users size={20}/>, color: 'bg-teal-100 text-teal-700' },
-                 ].map(item => (
-                     <button
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
+                {[
+                    { id: 'discipline', label: 'Xử lý Kỷ luật', icon: <Gavel size={20} />, color: 'bg-red-100 text-red-700' },
+                    { id: 'special', label: 'Tình huống Đặc biệt', icon: <ShieldAlert size={20} />, color: 'bg-orange-100 text-orange-700' },
+                    { id: 'seating', label: 'Sơ đồ Lớp học', icon: <Grid size={20} />, color: 'bg-blue-100 text-blue-700' },
+                    { id: 'committee', label: 'Ban Cán sự', icon: <Users size={20} />, color: 'bg-teal-100 text-teal-700' },
+                ].map(item => (
+                    <button
                         key={item.id}
                         onClick={() => { setAdvancedModule(item.id as any); setAdvancedResult(''); }}
                         className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 font-bold
-                        ${advancedModule === item.id 
-                            ? `${item.color} border-current ring-1 ring-current` 
-                            : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                     >
-                         {item.icon}
-                         <span>{item.label}</span>
-                     </button>
-                 ))}
-             </div>
+                        ${advancedModule === item.id
+                                ? `${item.color} border-current ring-1 ring-current`
+                                : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                    >
+                        {item.icon}
+                        <span>{item.label}</span>
+                    </button>
+                ))}
+            </div>
 
-             <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm p-6 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm p-6 overflow-y-auto custom-scrollbar">
                 {!advancedModule && (
                     <div className="h-full flex flex-col items-center justify-center text-slate-400">
                         <Crown size={64} className="mb-4 opacity-20 text-orange-400" />
@@ -969,94 +969,94 @@ const StudentManagement: React.FC = () => {
                 {advancedModule === 'discipline' && (
                     <div className="max-w-2xl mx-auto space-y-6">
                         <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            <Gavel className="text-red-600"/> Quy trình Xử lý Kỷ luật Tích cực
+                            <Gavel className="text-red-600" /> Quy trình Xử lý Kỷ luật Tích cực
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <input value={disciplineStudentName} onChange={e => setDisciplineStudentName(e.target.value)} placeholder="Tên học sinh" className="px-4 py-2 border rounded-lg"/>
-                            <input value={disciplineStudentDob} onChange={e => setDisciplineStudentDob(e.target.value)} placeholder="Ngày sinh (dd/mm/yyyy)" className="px-4 py-2 border rounded-lg"/>
+                            <input value={disciplineStudentName} onChange={e => setDisciplineStudentName(e.target.value)} placeholder="Tên học sinh" className="px-4 py-2 border rounded-lg" />
+                            <input value={disciplineStudentDob} onChange={e => setDisciplineStudentDob(e.target.value)} placeholder="Ngày sinh (dd/mm/yyyy)" className="px-4 py-2 border rounded-lg" />
                         </div>
                         <select value={selectedViolation} onChange={e => setSelectedViolation(e.target.value)} className="w-full px-4 py-2 border rounded-lg">
                             <option value="">-- Chọn hành vi vi phạm --</option>
                             {VIOLATION_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                         </select>
                         {selectedViolation === 'khac' && (
-                            <input value={customViolation} onChange={e => setCustomViolation(e.target.value)} placeholder="Mô tả hành vi..." className="w-full px-4 py-2 border rounded-lg"/>
+                            <input value={customViolation} onChange={e => setCustomViolation(e.target.value)} placeholder="Mô tả hành vi..." className="w-full px-4 py-2 border rounded-lg" />
                         )}
                         <button onClick={handleGenerateDiscipline} disabled={isGeneratingDiscipline} className="w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition flex justify-center gap-2">
-                            {isGeneratingDiscipline ? <Loader2 className="animate-spin"/> : <Zap/>} Tạo Quy trình Xử lý
+                            {isGeneratingDiscipline ? <Loader2 className="animate-spin" /> : <Zap />} Tạo Quy trình Xử lý
                         </button>
                         {disciplineResult && <div className="mt-6 prose prose-sm max-w-none bg-slate-50 p-6 rounded-xl border border-slate-200" dangerouslySetInnerHTML={{ __html: disciplineResult }} />}
                     </div>
                 )}
 
                 {advancedModule === 'special' && (
-                     <div className="max-w-2xl mx-auto space-y-6">
+                    <div className="max-w-2xl mx-auto space-y-6">
                         <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            <ShieldAlert className="text-orange-600"/> Xử lý Tình huống Đặc biệt (Khủng hoảng)
+                            <ShieldAlert className="text-orange-600" /> Xử lý Tình huống Đặc biệt (Khủng hoảng)
                         </h3>
-                         <div className="grid grid-cols-2 gap-4">
-                            <input value={specialStudentName} onChange={e => setSpecialStudentName(e.target.value)} placeholder="Tên học sinh" className="px-4 py-2 border rounded-lg"/>
-                            <input value={specialStudentDob} onChange={e => setSpecialStudentDob(e.target.value)} placeholder="Ngày sinh (dd/mm/yyyy)" className="px-4 py-2 border rounded-lg"/>
+                        <div className="grid grid-cols-2 gap-4">
+                            <input value={specialStudentName} onChange={e => setSpecialStudentName(e.target.value)} placeholder="Tên học sinh" className="px-4 py-2 border rounded-lg" />
+                            <input value={specialStudentDob} onChange={e => setSpecialStudentDob(e.target.value)} placeholder="Ngày sinh (dd/mm/yyyy)" className="px-4 py-2 border rounded-lg" />
                         </div>
-                         <select value={selectedSpecialSituation} onChange={e => setSelectedSpecialSituation(e.target.value)} className="w-full px-4 py-2 border rounded-lg">
+                        <select value={selectedSpecialSituation} onChange={e => setSelectedSpecialSituation(e.target.value)} className="w-full px-4 py-2 border rounded-lg">
                             <option value="">-- Chọn tình huống --</option>
                             {SPECIAL_SITUATION_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
                         </select>
                         {selectedSpecialSituation === 'khac' && (
-                            <input value={customSpecialSituation} onChange={e => setCustomSpecialSituation(e.target.value)} placeholder="Mô tả tình huống..." className="w-full px-4 py-2 border rounded-lg"/>
+                            <input value={customSpecialSituation} onChange={e => setCustomSpecialSituation(e.target.value)} placeholder="Mô tả tình huống..." className="w-full px-4 py-2 border rounded-lg" />
                         )}
                         <button onClick={handleGenerateSpecial} disabled={isGeneratingSpecial} className="w-full py-3 bg-orange-600 text-white font-bold rounded-xl hover:bg-orange-700 transition flex justify-center gap-2">
-                            {isGeneratingSpecial ? <Loader2 className="animate-spin"/> : <Siren/>} Lập Kế hoạch Ứng phó
+                            {isGeneratingSpecial ? <Loader2 className="animate-spin" /> : <Siren />} Lập Kế hoạch Ứng phó
                         </button>
-                         {specialResult && <div className="mt-6 prose prose-sm max-w-none bg-slate-50 p-6 rounded-xl border border-slate-200" dangerouslySetInnerHTML={{ __html: specialResult }} />}
-                     </div>
+                        {specialResult && <div className="mt-6 prose prose-sm max-w-none bg-slate-50 p-6 rounded-xl border border-slate-200" dangerouslySetInnerHTML={{ __html: specialResult }} />}
+                    </div>
                 )}
 
                 {(advancedModule === 'seating' || advancedModule === 'committee') && (
-                     <div className="max-w-3xl mx-auto space-y-6">
-                         <div className="flex items-center justify-between">
-                             <h3 className="text-xl font-bold text-slate-800">
-                                 {advancedModule === 'seating' ? 'Sắp xếp Sơ đồ Lớp học' : 'Đề xuất Ban Cán sự'}
-                             </h3>
-                             <div className="text-sm text-slate-500">
-                                 {selectedClassId 
-                                    ? `Đang dùng danh sách lớp: ${savedClasses.find(c=>c.id === selectedClassId)?.name}` 
+                    <div className="max-w-3xl mx-auto space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-slate-800">
+                                {advancedModule === 'seating' ? 'Sắp xếp Sơ đồ Lớp học' : 'Đề xuất Ban Cán sự'}
+                            </h3>
+                            <div className="text-sm text-slate-500">
+                                {selectedClassId
+                                    ? `Đang dùng danh sách lớp: ${savedClasses.find(c => c.id === selectedClassId)?.name}`
                                     : students.length > 0 ? `Đang dùng danh sách tải lên (${students.length} HS)` : <span className="text-red-500">Chưa có danh sách HS</span>}
-                             </div>
-                         </div>
+                            </div>
+                        </div>
 
-                         {advancedModule === 'seating' && (
-                             <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800 border border-blue-200">
-                                 <p className="font-bold mb-2">Chiến lược: Kết hợp Đa yếu tố (Tối ưu nhất)</p>
-                                 <ul className="list-disc pl-5 space-y-1">
-                                     <li>Thần số học: Ghép cặp bổ trợ tính cách (VD: Số 1 lãnh đạo + Số 9 hòa đồng).</li>
-                                     <li>Năng lực: Đôi bạn cùng tiến.</li>
-                                     <li>Thể chất: Ưu tiên thị lực/chiều cao.</li>
-                                 </ul>
-                             </div>
-                         )}
+                        {advancedModule === 'seating' && (
+                            <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800 border border-blue-200">
+                                <p className="font-bold mb-2">Chiến lược: Kết hợp Đa yếu tố (Tối ưu nhất)</p>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>Thần số học: Ghép cặp bổ trợ tính cách (VD: Số 1 lãnh đạo + Số 9 hòa đồng).</li>
+                                    <li>Năng lực: Đôi bạn cùng tiến.</li>
+                                    <li>Thể chất: Ưu tiên thị lực/chiều cao.</li>
+                                </ul>
+                            </div>
+                        )}
 
-                         <button 
-                            onClick={() => handleGenerateAdvanced(advancedModule as 'committee'|'seating')}
+                        <button
+                            onClick={() => handleGenerateAdvanced(advancedModule as 'committee' | 'seating')}
                             disabled={advancedLoading || (students.length === 0 && !selectedClassId)}
                             className="w-full py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition shadow-md flex items-center justify-center gap-2 disabled:bg-slate-300"
-                         >
-                             {advancedLoading ? <Loader2 className="animate-spin"/> : <Sparkles/>} 
-                             {advancedModule === 'seating' ? 'Tạo Sơ đồ Chỗ ngồi' : 'Đề xuất Ban Cán sự'}
-                         </button>
+                        >
+                            {advancedLoading ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                            {advancedModule === 'seating' ? 'Tạo Sơ đồ Chỗ ngồi' : 'Đề xuất Ban Cán sự'}
+                        </button>
 
-                         {advancedResult && (
-                             <div className="mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm animate-fade-in-up">
-                                 <div className="p-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-700 flex justify-between items-center">
-                                     <span>Kết quả Đề xuất</span>
-                                     <button className="text-blue-600 text-xs hover:underline">Sao chép</button>
-                                 </div>
-                                 <div className="p-6 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: advancedResult }} />
-                             </div>
-                         )}
-                     </div>
+                        {advancedResult && (
+                            <div className="mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm animate-fade-in-up">
+                                <div className="p-4 bg-slate-50 border-b border-slate-200 font-bold text-slate-700 flex justify-between items-center">
+                                    <span>Kết quả Đề xuất</span>
+                                    <button className="text-blue-600 text-xs hover:underline">Sao chép</button>
+                                </div>
+                                <div className="p-6 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: advancedResult }} />
+                            </div>
+                        )}
+                    </div>
                 )}
-             </div>
+            </div>
         </div>
     );
 
@@ -1065,14 +1065,14 @@ const StudentManagement: React.FC = () => {
             {/* ... (Header) ... */}
             <div className="flex-none border-b border-slate-100 p-4 flex items-center justify-between bg-white">
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                    <button 
+                    <button
                         onClick={() => setViewMode('upload')}
                         className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2
                         ${viewMode === 'upload' ? 'bg-teal-50 text-teal-700' : 'text-slate-500 hover:bg-slate-50'}`}
                     >
                         <Upload size={16} /> Tải dữ liệu
                     </button>
-                    <button 
+                    <button
                         onClick={() => setViewMode('folders')}
                         className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2
                         ${(viewMode === 'folders' || viewMode === 'class_detail' || viewMode === 'student_detail') ? 'bg-teal-50 text-teal-700' : 'text-slate-500 hover:bg-slate-50'}`}
@@ -1080,21 +1080,21 @@ const StudentManagement: React.FC = () => {
                         <FolderOpen size={16} /> Hồ sơ lớp ({savedClasses.length})
                     </button>
                     <div className="w-px h-6 bg-slate-200 mx-2"></div>
-                    <button 
+                    <button
                         onClick={() => setViewMode('quick_consult')}
                         className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2
                         ${viewMode === 'quick_consult' ? 'bg-purple-50 text-purple-700' : 'text-slate-500 hover:bg-slate-50'}`}
                     >
                         <Zap size={16} /> Xử lý nhanh
                     </button>
-                    <button 
+                    <button
                         onClick={() => setViewMode('advanced_management')}
                         className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2
                         ${viewMode === 'advanced_management' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'}`}
                     >
-                        <Crown size={16} className="text-orange-500"/> Quản lý cao cấp
+                        <Crown size={16} className="text-orange-500" /> Quản lý cao cấp
                     </button>
-                    <button 
+                    <button
                         onClick={() => setViewMode('daily_notes')}
                         className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2
                         ${viewMode === 'daily_notes' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}
@@ -1109,56 +1109,57 @@ const StudentManagement: React.FC = () => {
                 {viewMode === 'upload' && (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto">
                         <div className="bg-white p-8 rounded-2xl border border-dashed border-slate-300 w-full hover:border-teal-400 transition-colors group">
-                             <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                 {analyzingFile ? <Loader2 className="animate-spin text-teal-600" size={32}/> : <Upload className="text-teal-600" size={32}/>}
-                             </div>
-                             
-                             <h3 className="text-xl font-bold text-slate-800 mb-2">Tải lên danh sách học sinh</h3>
-                             
-                             <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-6 text-sm text-blue-800">
-                                 <div className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 flex-wrap">
-                                    <span className="font-bold flex items-center gap-1"><AlertCircle size={16}/> File Excel cần có cột:</span>
-                                    <span className="font-semibold bg-white px-2 py-0.5 rounded border border-blue-200 shadow-sm">Họ và tên</span>
-                                    <span className="font-semibold bg-white px-2 py-0.5 rounded border border-blue-200 shadow-sm">Ngày sinh (dd/mm/yyyy)</span>
-                                    <span className="font-semibold bg-white px-2 py-0.5 rounded border border-blue-200 shadow-sm">Lớp</span>
-                                 </div>
-                             </div>
-                             
-                             <div className="relative">
-                                 <input 
-                                     type="file" 
-                                     onChange={handleFileUpload}
-                                     accept=".xlsx,.xls,.pdf,.docx,.doc"
-                                     disabled={analyzingFile}
-                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                 />
-                                 <button className="bg-teal-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-lg shadow-teal-200 pointer-events-none">
-                                     {analyzingFile ? "Đang phân tích..." : "Chọn file từ máy tính"}
-                                 </button>
-                             </div>
-                             
-                             {error && <p className="text-red-500 mt-4 text-sm font-medium">{error}</p>}
+                            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                {analyzingFile ? <Loader2 className="animate-spin text-teal-600" size={32} /> : <Upload className="text-teal-600" size={32} />}
+                            </div>
+
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Tải lên danh sách học sinh</h3>
+
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-6 text-sm text-blue-800">
+                                <div className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 flex-wrap">
+                                    <span className="font-bold flex items-center gap-1"><AlertCircle size={16} /> Hỗ trợ định dạng:</span>
+                                    <span className="font-semibold bg-white px-2 py-0.5 rounded border border-green-200 shadow-sm text-green-700">Excel (.xlsx, .xls)</span>
+                                    <span className="font-semibold bg-white px-2 py-0.5 rounded border border-red-200 shadow-sm text-red-700">PDF</span>
+                                    <span className="font-semibold bg-white px-2 py-0.5 rounded border border-blue-200 shadow-sm text-blue-700">Word (.docx)</span>
+                                </div>
+                                <p className="text-xs text-center mt-2 opacity-75">Chỉ cần có danh sách học sinh - AI sẽ tự động trích xuất thông tin</p>
+                            </div>
+
+                            <div className="relative">
+                                <input
+                                    type="file"
+                                    onChange={handleFileUpload}
+                                    accept=".xlsx,.xls,.pdf,.docx,.doc"
+                                    disabled={analyzingFile}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                                <button className="bg-teal-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-lg shadow-teal-200 pointer-events-none">
+                                    {analyzingFile ? "Đang phân tích..." : "Chọn file từ máy tính"}
+                                </button>
+                            </div>
+
+                            {error && <p className="text-red-500 mt-4 text-sm font-medium">{error}</p>}
                         </div>
 
                         {students.length > 0 && (
                             <div className="mt-8 w-full animate-fade-in-up">
                                 <div className="mb-6 p-4 bg-teal-50 border border-teal-100 rounded-xl flex items-center justify-between shadow-sm">
                                     <div>
-                                        <h4 className="font-bold text-teal-800 flex items-center gap-2"><Sparkles size={18} className="text-teal-600"/> Phân tích Thần số học & Tâm lý</h4>
+                                        <h4 className="font-bold text-teal-800 flex items-center gap-2"><Sparkles size={18} className="text-teal-600" /> Phân tích Thần số học & Tâm lý</h4>
                                         <p className="text-xs text-teal-600 mt-1">Phân tích sâu cho toàn bộ danh sách (Mất khoảng vài phút)</p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <button 
+                                        <button
                                             onClick={handleAnalyzeAll}
                                             disabled={isAnalyzing}
                                             className="bg-teal-600 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-teal-700 transition shadow-md flex items-center gap-2 disabled:bg-slate-400"
                                         >
-                                            {isAnalyzing ? <Loader2 className="animate-spin" size={18}/> : <Sparkles size={18}/>}
+                                            {isAnalyzing ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
                                             {isAnalyzing ? `Đang xử lý ${Object.keys(analysisResults).length}/${students.length}...` : "Phân tích ngay"}
                                         </button>
 
                                         {Object.keys(analysisResults).length > 0 && !isAnalyzing && (
-                                            <button 
+                                            <button
                                                 onClick={handleDownloadWord}
                                                 className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center gap-2 animate-fade-in"
                                             >
@@ -1169,14 +1170,14 @@ const StudentManagement: React.FC = () => {
                                 </div>
 
                                 <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-slate-700 flex items-center gap-2"><CheckCircle size={18} className="text-green-500"/> Đã tìm thấy {students.length} học sinh</h3>
+                                    <h3 className="font-bold text-slate-700 flex items-center gap-2"><CheckCircle size={18} className="text-green-500" /> Đã tìm thấy {students.length} học sinh</h3>
                                     <div className="flex gap-2">
                                         <button onClick={handleResetUpload} className="text-sm text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition font-medium">Hủy bỏ</button>
-                                        <button 
+                                        <button
                                             onClick={saveClassToStorage}
                                             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm"
                                         >
-                                            <Save size={16}/> Lưu hồ sơ lớp
+                                            <Save size={16} /> Lưu hồ sơ lớp
                                         </button>
                                     </div>
                                 </div>
@@ -1213,8 +1214,8 @@ const StudentManagement: React.FC = () => {
                 {viewMode === 'quick_consult' && renderQuickConsultView()}
                 {viewMode === 'advanced_management' && renderAdvancedManagementView()}
                 {viewMode === 'daily_notes' && (
-                    <DailyQuickNotes 
-                        savedClasses={savedClasses} 
+                    <DailyQuickNotes
+                        savedClasses={savedClasses}
                         onSaveToStudent={handleSaveQuickNoteToStudent}
                     />
                 )}

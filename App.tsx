@@ -31,7 +31,7 @@ const VisitCounter: React.FC = () => {
                 sessionStorage.setItem('has_counted_visit', 'true');
             }
 
-            setCount(3351 + current);
+            setCount(1569 + current);
         } catch (e) {
             console.error("Visit counter error", e);
         }
