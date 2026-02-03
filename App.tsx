@@ -335,9 +335,9 @@ const AppContent: React.FC = () => {
                             <div className="text-sm font-medium text-slate-600 bg-yellow-50 border border-yellow-100 p-4 rounded-xl inline-block">
                                 <p className="mb-1 flex items-center justify-center gap-2">
                                     <AlertTriangle size={16} className="text-yellow-600" />
-                                    ƯU ĐÃI ĐẾN HẾT <span className="text-red-600 font-bold">1/1/2026</span>
+                                    ƯU ĐÃI ĐẾN HẾT <span className="text-red-600 font-bold">20/3/2026</span>
                                 </p>
-                                <p className="opacity-80 text-xs">Sau 1/1/2026 - NÂNG VIP LÀ <span className="font-bold text-slate-800">99.000đ</span></p>
+                                <p className="opacity-80 text-xs">Sau 20/3/2026 - NÂNG VIP LÀ <span className="font-bold text-slate-800">499.000đ</span></p>
                             </div>
                         </div>
                     </div>

@@ -134,6 +134,7 @@ const ComprehensiveReport: React.FC = () => {
 
         try {
             if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                // Excel file handling
                 const reader = new FileReader();
 
                 reader.onload = async (event) => {
@@ -157,7 +158,7 @@ const ComprehensiveReport: React.FC = () => {
                         const extractedStudents = await extractStudentListFromFiles(csv, 'text/csv', apiKey, selectedModel);
 
                         if (!extractedStudents || extractedStudents.length === 0) {
-                            throw new Error("Không tìm thấy dữ liệu học sinh trong file. Vui lòng kiểm tra file có chứa danh sách học sinh.");
+                            throw new Error("Không tìm thấy dữ liệu học sinh trong file. Vui lòng kiểm tra file có chứa danh sách.");
                         }
 
                         setStudents(extractedStudents);
@@ -176,8 +177,46 @@ const ComprehensiveReport: React.FC = () => {
                 };
 
                 reader.readAsBinaryString(file);
+            } else if (file.name.endsWith('.pdf') || file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
+                // PDF/Word file handling - send to AI for extraction
+                const reader = new FileReader();
+
+                reader.onload = async (event) => {
+                    try {
+                        const base64 = (event.target?.result as string)?.split(',')[1];
+                        if (!base64) {
+                            throw new Error("Không thể đọc file. Vui lòng thử lại.");
+                        }
+
+                        let mimeType = 'application/octet-stream';
+                        if (file.name.endsWith('.pdf')) mimeType = 'application/pdf';
+                        else if (file.name.endsWith('.docx')) mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                        else if (file.name.endsWith('.doc')) mimeType = 'application/msword';
+
+                        const extractedStudents = await extractStudentListFromFiles(base64, mimeType, apiKey, selectedModel);
+
+                        if (!extractedStudents || extractedStudents.length === 0) {
+                            throw new Error("Không tìm thấy dữ liệu học sinh trong file. Vui lòng kiểm tra file có chứa danh sách.");
+                        }
+
+                        setStudents(extractedStudents);
+                        setIsAnalyzing(false);
+                    } catch (innerErr: any) {
+                        console.error("Error processing PDF/Word:", innerErr);
+                        setError(innerErr.message || "Lỗi khi phân tích file.");
+                        setIsAnalyzing(false);
+                    }
+                };
+
+                reader.onerror = () => {
+                    console.error("FileReader error:", reader.error);
+                    setError("Lỗi đọc file. Vui lòng thử lại hoặc chọn file khác.");
+                    setIsAnalyzing(false);
+                };
+
+                reader.readAsDataURL(file);
             } else {
-                throw new Error("Vui lòng tải lên file Excel (.xlsx, .xls) để có dữ liệu chính xác nhất.");
+                throw new Error("Vui lòng tải lên file Excel (.xlsx, .xls), PDF, hoặc Word (.docx).");
             }
         } catch (err: any) {
             console.error(err);
@@ -420,21 +459,27 @@ const ComprehensiveReport: React.FC = () => {
                         <FileText size={40} />
                     </div>
                     <h2 className="text-2xl font-bold text-rose-800 mb-3">🌸 Tạo Báo Cáo Tổng Hợp</h2>
-                    <p className="text-slate-500 mb-8 leading-relaxed">
-                        Tải lên file Excel có danh sách học sinh. Hệ thống sẽ tự động trích xuất thông tin có sẵn (Họ tên, Điểm, Hạnh kiểm...) và tạo báo cáo tổng kết chuyên nghiệp.
+                    <p className="text-slate-500 mb-4 leading-relaxed">
+                        Tải lên file có danh sách học sinh. AI sẽ tự động trích xuất thông tin có sẵn và tạo báo cáo tổng kết chuyên nghiệp.
                     </p>
+
+                    <div className="flex flex-wrap justify-center gap-2 mb-6">
+                        <span className="text-xs font-semibold bg-green-50 text-green-700 px-3 py-1 rounded-full border border-green-200">Excel (.xlsx, .xls)</span>
+                        <span className="text-xs font-semibold bg-red-50 text-red-700 px-3 py-1 rounded-full border border-red-200">PDF</span>
+                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200">Word (.docx)</span>
+                    </div>
 
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-rose-200 hover:from-rose-600 hover:to-pink-600 transition flex items-center justify-center gap-3 w-full sm:w-auto mx-auto"
                     >
                         <Upload size={20} />
-                        Tải lên bảng điểm Excel
+                        Tải lên file danh sách
                     </button>
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept=".xlsx, .xls"
+                        accept=".xlsx,.xls,.pdf,.docx,.doc"
                         onChange={handleFileUpload}
                         className="hidden"
                     />
