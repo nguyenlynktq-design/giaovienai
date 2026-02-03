@@ -378,7 +378,7 @@ const AppContent: React.FC = () => {
                                         </p>
                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                                             <a
-                                                href="https://www.facebook.com/tranhoaithanhvicko"
+                                                href="https://www.facebook.com/profile.php?id=61586774156159"
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition w-full sm:w-auto justify-center shadow-sm shadow-blue-200"
@@ -395,9 +395,9 @@ const AppContent: React.FC = () => {
                         </div>
 
                         {/* Right Column */}
-                        <div className="col-span-12 lg:col-span-6 h-full bg-slate-50/30 p-6 overflow-hidden flex flex-col relative">
-                            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-teal-200/20 rounded-full blur-3xl pointer-events-none"></div>
-                            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-blue-200/20 rounded-full blur-3xl pointer-events-none"></div>
+                        <div className="col-span-12 lg:col-span-6 h-full bg-gradient-to-br from-rose-50/50 to-pink-50/50 p-6 overflow-hidden flex flex-col relative">
+                            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-rose-200/30 rounded-full blur-3xl pointer-events-none"></div>
+                            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-pink-200/30 rounded-full blur-3xl pointer-events-none"></div>
 
                             <div className="relative h-full flex flex-col z-0">
                                 {(currentEmail || loading) ? (
@@ -428,7 +428,7 @@ const AppContent: React.FC = () => {
                                                 </p>
                                                 <ul className="space-y-3 text-slate-600 text-sm">
                                                     <li className="flex items-center gap-3">
-                                                        <span className="w-24 font-mono text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2 py-1 rounded text-center">Excel</span>
+                                                        <span className="w-24 font-mono text-xs bg-rose-50 text-rose-700 border border-rose-200 px-2 py-1 rounded text-center">Excel</span>
                                                         <span>File chứa cột Tên và các cột điểm số.</span>
                                                     </li>
                                                     <li className="flex items-center gap-3">
