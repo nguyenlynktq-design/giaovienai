@@ -6,7 +6,7 @@ import { useApiKey } from '../contexts/ApiKeyContext';
 import { useAuth } from '../contexts/AuthContext';
 import { generatePersonalityAnalysis, extractStudentListFromFiles, exportStudentAnalysesToDocx, generateSolutionForStudent, exportSolutionToDocx, generateClassCommitteeSuggestion, generateSeatingArrangementSuggestion, generateDisciplinePlan, generateSpecialSituationPlan } from '../services/geminiService';
 import { SPECIAL_SITUATIONS, SEATING_STRATEGIES, COMMITTEE_ROLES, VIOLATION_TYPES, SPECIAL_SITUATION_TYPES } from '../data/advancedManagementData';
-import { Upload, BrainCircuit, Search, Crown, Loader2, AlertCircle, User, Activity, Sparkles, Target, Lightbulb, Home, Lock, Save, Folder, FolderOpen, ChevronRight, FileText, MessageSquare, ArrowRight, Copy, Download, FileSpreadsheet, Gavel, Award, AlertTriangle, Scale, Clock, ShieldAlert, Users, Grid, Zap, Calendar, Siren, CheckCircle, Trash2, XCircle, RefreshCw, Plus, UserPlus, X, CheckSquare, Square, MoreVertical, StickyNote } from 'lucide-react';
+import { Upload, BrainCircuit, Search, Crown, Loader2, AlertCircle, User, Activity, Sparkles, Target, Lightbulb, Home, Lock, Save, Folder, FolderOpen, ChevronRight, FileText, MessageSquare, ArrowRight, Copy, Download, FileSpreadsheet, Gavel, Award, AlertTriangle, Scale, Clock, ShieldAlert, Users, Grid, Zap, Calendar, Siren, CheckCircle, Trash2, XCircle, RefreshCw, Plus, UserPlus, X, CheckSquare, Square, MoreVertical, StickyNote, GraduationCap, MessageCircle, Send } from 'lucide-react';
 import DailyQuickNotes from './DailyQuickNotes';
 
 const StudentManagement: React.FC = () => {
@@ -21,7 +21,7 @@ const StudentManagement: React.FC = () => {
     const [analyzingFile, setAnalyzingFile] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useState<'upload' | 'folders' | 'class_detail' | 'student_detail' | 'quick_consult' | 'advanced_management' | 'daily_notes'>('upload');
+    const [viewMode, setViewMode] = useState<'upload' | 'folders' | 'class_detail' | 'student_detail' | 'quick_consult' | 'advanced_management' | 'daily_notes' | 'expert_chat'>('upload');
     const [advancedModule, setAdvancedModule] = useState<'discipline' | 'special' | 'seating' | 'committee' | null>(null);
 
     // Advanced Management State
@@ -66,6 +66,12 @@ const StudentManagement: React.FC = () => {
     const [quickIssue, setQuickIssue] = useState('');
     const [quickAnalysis, setQuickAnalysis] = useState('');
     const [quickSolution, setQuickSolution] = useState('');
+
+    // Expert Chat State
+    const [expertQuestion, setExpertQuestion] = useState('');
+    const [expertAnswer, setExpertAnswer] = useState('');
+    const [isExpertLoading, setIsExpertLoading] = useState(false);
+    const [expertHistory, setExpertHistory] = useState<{ question: string, answer: string }[]>([]);
 
     useEffect(() => {
         const saved = localStorage.getItem('vip_saved_classes');
@@ -555,6 +561,134 @@ const StudentManagement: React.FC = () => {
             setIsGeneratingSpecial(false);
         }
     };
+
+    // --- EXPERT CHAT HANDLER ---
+    const handleExpertChat = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!apiKey) { setIsSettingsOpen(true); return; }
+        if (!expertQuestion.trim()) return;
+
+        setIsExpertLoading(true);
+        try {
+            const systemPrompt = `
+Bạn là CHUYÊN GIA GIÁO DỤC với 20 năm kinh nghiệm trong lĩnh vực giáo dục và tâm lý học đường.
+
+PHONG CÁCH TRẢ LỜI:
+1. THẤU HIỂU: Lắng nghe và đồng cảm với vấn đề của phụ huynh/học sinh
+2. CHIA SẺ: Chia sẻ kinh nghiệm thực tế và góc nhìn chuyên gia
+3. PHÂN TÍCH: Phân tích nguyên nhân sâu xa và các khía cạnh của vấn đề
+4. THUYẾT PHỤC: Đưa ra lời khuyên thuyết phục, có cơ sở khoa học
+
+NGUYÊN TẮC:
+- Trả lời bằng tiếng Việt, thân thiện nhưng chuyên nghiệp
+- Sử dụng ví dụ thực tế để minh họa
+- Đưa ra giải pháp cụ thể, có thể áp dụng ngay
+- Khuyến khích và tạo động lực tích cực
+- Tránh phán xét, luôn tôn trọng người hỏi
+
+Hãy trả lời câu hỏi sau một cách thông minh và khôn khéo:
+`;
+            const { GoogleGenAI } = await import('@google/genai');
+            const ai = new GoogleGenAI({ apiKey });
+            const response = await ai.models.generateContent({
+                model: selectedModel,
+                contents: systemPrompt + "\n\nCâu hỏi: " + expertQuestion,
+            });
+
+            const answer = response.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.";
+            setExpertAnswer(answer);
+            setExpertHistory(prev => [...prev, { question: expertQuestion, answer }]);
+            setExpertQuestion('');
+        } catch (err) {
+            console.error(err);
+            setExpertAnswer("Có lỗi xảy ra khi xử lý. Vui lòng thử lại.");
+        } finally {
+            setIsExpertLoading(false);
+        }
+    };
+
+    // --- RENDER EXPERT CHAT VIEW ---
+    const renderExpertChatView = () => (
+        <div className="h-full flex flex-col max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 rounded-t-2xl text-white">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <GraduationCap size={32} />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-bold">🎓 Chuyên Gia Giải Đáp Thông Minh</h2>
+                        <p className="text-amber-100 text-sm">20 năm kinh nghiệm • Thấu hiểu • Chia sẻ • Phân tích • Thuyết phục</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Chat Area */}
+            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-amber-50 to-white p-6 space-y-4">
+                {expertHistory.length === 0 && !expertAnswer && (
+                    <div className="text-center py-12 text-slate-500">
+                        <MessageCircle size={48} className="mx-auto mb-4 text-amber-300" />
+                        <p className="font-medium">Hãy đặt câu hỏi về vấn đề của phụ huynh hoặc học sinh</p>
+                        <p className="text-sm mt-2">Ví dụ: "Con tôi mất tập trung trong giờ học, làm sao để giúp con?"</p>
+                    </div>
+                )}
+
+                {expertHistory.map((item, idx) => (
+                    <div key={idx} className="space-y-3">
+                        {/* Question */}
+                        <div className="flex justify-end">
+                            <div className="bg-amber-500 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-[80%] shadow">
+                                <p className="text-sm">{item.question}</p>
+                            </div>
+                        </div>
+                        {/* Answer */}
+                        <div className="flex justify-start">
+                            <div className="bg-white border border-amber-200 px-4 py-3 rounded-2xl rounded-bl-md max-w-[90%] shadow-sm">
+                                <div className="flex items-center gap-2 mb-2 text-amber-600">
+                                    <GraduationCap size={16} />
+                                    <span className="text-xs font-bold">Chuyên gia</span>
+                                </div>
+                                <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{item.answer}</div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                {isExpertLoading && (
+                    <div className="flex justify-start">
+                        <div className="bg-white border border-amber-200 px-4 py-3 rounded-2xl shadow-sm flex items-center gap-2">
+                            <Loader2 className="animate-spin text-amber-500" size={20} />
+                            <span className="text-sm text-slate-500">Đang phân tích...</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Input Area */}
+            <form onSubmit={handleExpertChat} className="bg-white border-t border-amber-100 p-4">
+                <div className="flex gap-3">
+                    <textarea
+                        value={expertQuestion}
+                        onChange={(e) => setExpertQuestion(e.target.value)}
+                        placeholder="Nhập câu hỏi của bạn về vấn đề phụ huynh, học sinh..."
+                        className="flex-1 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                        rows={2}
+                        disabled={isExpertLoading}
+                    />
+                    <button
+                        type="submit"
+                        disabled={isExpertLoading || !expertQuestion.trim()}
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:from-amber-600 hover:to-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                        {isExpertLoading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+                    </button>
+                </div>
+                <p className="text-xs text-slate-400 mt-2 text-center">
+                    💡 Hỏi bất kỳ vấn đề nào về giáo dục, tâm lý học đường, kỷ luật, động lực học tập...
+                </p>
+            </form>
+        </div>
+    );
 
 
     // --- RENDER HELPERS ---
@@ -1101,6 +1235,13 @@ const StudentManagement: React.FC = () => {
                     >
                         <StickyNote size={16} /> Ghi chú nhanh
                     </button>
+                    <button
+                        onClick={() => setViewMode('expert_chat')}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2
+                        ${viewMode === 'expert_chat' ? 'bg-amber-50 text-amber-700' : 'text-slate-500 hover:bg-slate-50'}`}
+                    >
+                        <GraduationCap size={16} className="text-amber-500" /> Chuyên gia
+                    </button>
                 </div>
             </div>
 
@@ -1219,6 +1360,7 @@ const StudentManagement: React.FC = () => {
                         onSaveToStudent={handleSaveQuickNoteToStudent}
                     />
                 )}
+                {viewMode === 'expert_chat' && renderExpertChatView()}
             </div>
         </div>
     );
