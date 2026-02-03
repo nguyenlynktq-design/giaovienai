@@ -39,15 +39,15 @@ const VisitCounter: React.FC = () => {
 
     return (
         <a
-            href="https://trolygvcn.vercel.app/"
+            href="https://giaovienai-tau.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-md border border-teal-200 rounded-full shadow-sm text-teal-800 text-xs font-bold mr-2 animate-fade-in hover:bg-white/90 transition-colors"
+            className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-md border border-rose-200 rounded-full shadow-sm text-rose-800 text-xs font-bold mr-2 animate-fade-in hover:bg-white/90 transition-colors"
             title="Truy cập trang chủ"
         >
             <div className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
             </div>
             <span>{count.toLocaleString()} lượt truy cập</span>
         </a>
@@ -292,17 +292,17 @@ const AppContent: React.FC = () => {
                                         <div className="flex items-center justify-between border-b border-blue-200/50 pb-2">
                                             <span className="text-slate-500 text-sm font-medium">Ngân hàng</span>
                                             <span className="font-bold text-slate-800 flex items-center gap-2">
-                                                <div className="w-6 h-6 bg-red-800 rounded-md flex items-center justify-center text-white text-[9px] font-bold">A</div>
-                                                Agribank
+                                                <div className="w-6 h-6 bg-purple-700 rounded-md flex items-center justify-center text-white text-[9px] font-bold">MB</div>
+                                                MB Bank
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between border-b border-blue-200/50 pb-2">
                                             <span className="text-slate-500 text-sm font-medium">Số tài khoản</span>
-                                            <span className="font-bold text-slate-800 tracking-wider text-lg">2302205102323</span>
+                                            <span className="font-bold text-slate-800 tracking-wider text-lg">0962859488</span>
                                         </div>
                                         <div className="flex items-center justify-between border-b border-blue-200/50 pb-2">
                                             <span className="text-slate-500 text-sm font-medium">Chủ tài khoản</span>
-                                            <span className="font-bold text-slate-800 uppercase text-sm">MS LY AI</span>
+                                            <span className="font-bold text-slate-800 uppercase text-sm">NGUYEN THI LY</span>
                                         </div>
                                         <div className="bg-blue-100/50 p-3 rounded-lg border border-blue-200">
                                             <span className="text-xs text-slate-500 block mb-1 font-semibold uppercase">Nội dung chuyển khoản</span>
@@ -314,13 +314,13 @@ const AppContent: React.FC = () => {
                                         {/* QR Code Placeholder/Generator */}
                                         <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-inner border border-slate-200 flex items-center justify-center overflow-hidden relative group cursor-pointer" title="Quét mã để thanh toán">
                                             <img
-                                                src="https://img.vietqr.io/image/Agribank-2302205102323-compact.jpg?amount=&addInfo=&accountName=TRAN%20HOAI%20THANH"
-                                                alt="QR Code Agribank"
+                                                src="https://img.vietqr.io/image/MB-0962859488-compact.jpg?amount=&addInfo=&accountName=NGUYEN%20THI%20LY"
+                                                alt="QR Code MB Bank"
                                                 className="w-full h-full object-contain"
                                                 onError={(e) => {
                                                     e.currentTarget.onerror = null;
                                                     // Fallback
-                                                    e.currentTarget.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=2302205102323';
+                                                    e.currentTarget.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=0962859488';
                                                 }}
                                             />
                                         </div>

@@ -157,7 +157,7 @@ const ComprehensiveReport: React.FC = () => {
                         const extractedStudents = await extractStudentListFromFiles(csv, 'text/csv', apiKey, selectedModel);
 
                         if (!extractedStudents || extractedStudents.length === 0) {
-                            throw new Error("Không thể trích xuất danh sách học sinh từ file. Vui lòng kiểm tra định dạng file (cần có cột: Họ tên, Điểm TB, Hạnh kiểm...)");
+                            throw new Error("Không tìm thấy dữ liệu học sinh trong file. Vui lòng kiểm tra file có chứa danh sách học sinh.");
                         }
 
                         setStudents(extractedStudents);
@@ -421,7 +421,7 @@ const ComprehensiveReport: React.FC = () => {
                     </div>
                     <h2 className="text-2xl font-bold text-rose-800 mb-3">🌸 Tạo Báo Cáo Tổng Hợp</h2>
                     <p className="text-slate-500 mb-8 leading-relaxed">
-                        Tải lên bảng điểm Excel (có cột Điểm TB, Hạnh kiểm, Vi phạm...) để hệ thống tự động phân tích và tạo báo cáo tổng kết học kỳ chuyên nghiệp.
+                        Tải lên file Excel có danh sách học sinh. Hệ thống sẽ tự động trích xuất thông tin có sẵn (Họ tên, Điểm, Hạnh kiểm...) và tạo báo cáo tổng kết chuyên nghiệp.
                     </p>
 
                     <button

@@ -65,7 +65,7 @@ const formatGeminiError = (error: any): string => {
     if (typeof error === 'string') msg = error;
     else if (error.message) msg = error.message;
     else msg = JSON.stringify(error);
-    
+
     // Normalize case
     const lowerMsg = msg.toLowerCase();
 
@@ -78,7 +78,7 @@ const formatGeminiError = (error: any): string => {
     if (lowerMsg.includes('503') || lowerMsg.includes('overloaded') || lowerMsg.includes('unavailable')) {
         return "⚠️ Server Google đang quá tải. Hãy thử lại sau giây lát.";
     }
-    
+
     // Truncate long error messages for display
     return "Lỗi kết nối AI: " + (msg.length > 100 ? msg.substring(0, 100) + "..." : msg);
 };
@@ -113,12 +113,12 @@ async function callGeminiWithFallback(
             const msg = error.message || JSON.stringify(error);
             const lowerMsg = msg.toLowerCase();
             const status = error?.status || error?.response?.status;
-            
+
             // If Invalid Key, stop immediately
             if (status === 400 || status === 401 || lowerMsg.includes('api key')) {
-                 throw new Error(formatGeminiError(error));
+                throw new Error(formatGeminiError(error));
             }
-            
+
             // If Quota exceeded (429), we can try other models, but usually quota is per project/key.
             // However, different models might have different quotas or tiers. We continue loop.
         }
@@ -129,44 +129,44 @@ async function callGeminiWithFallback(
 }
 
 const getToneInstruction = (tone: string, custom?: string): string => {
-  switch (tone) {
-    case 'professional':
-      return "Giọng văn trang trọng, lịch sự, ngắn gọn, tập trung vào sự chuyên nghiệp và tôn trọng.";
-    case 'cheerful':
-      return "Giọng văn vui tươi, hào hứng, tràn đầy năng lượng tích cực.";
-    case 'encouraging':
-      return "Giọng văn tập trung vào việc khích lệ, động viên, nhìn vào tiềm năng phát triển của học sinh.";
-    case 'critical':
-      return "Giọng văn thẳng thắn, nghiêm khắc chỉ ra khuyết điểm/lỗi sai một cách rõ ràng nhưng vẫn giữ tinh thần xây dựng, kết thúc bằng động viên để học sinh sửa đổi.";
-    case 'other':
-      return `Yêu cầu về giọng văn: ${custom || 'Tự do theo ngữ cảnh'}.`;
-    case 'friendly':
-    default:
-      return "Giọng văn thân mật, ấm áp, gần gũi như người nhà, thể hiện sự quan tâm sâu sắc.";
-  }
+    switch (tone) {
+        case 'professional':
+            return "Giọng văn trang trọng, lịch sự, ngắn gọn, tập trung vào sự chuyên nghiệp và tôn trọng.";
+        case 'cheerful':
+            return "Giọng văn vui tươi, hào hứng, tràn đầy năng lượng tích cực.";
+        case 'encouraging':
+            return "Giọng văn tập trung vào việc khích lệ, động viên, nhìn vào tiềm năng phát triển của học sinh.";
+        case 'critical':
+            return "Giọng văn thẳng thắn, nghiêm khắc chỉ ra khuyết điểm/lỗi sai một cách rõ ràng nhưng vẫn giữ tinh thần xây dựng, kết thúc bằng động viên để học sinh sửa đổi.";
+        case 'other':
+            return `Yêu cầu về giọng văn: ${custom || 'Tự do theo ngữ cảnh'}.`;
+        case 'friendly':
+        default:
+            return "Giọng văn thân mật, ấm áp, gần gũi như người nhà, thể hiện sự quan tâm sâu sắc.";
+    }
 };
 
 const getScenarioInstruction = (scenario: string, custom?: string): string => {
-  switch (scenario) {
-    case 'achievement':
-      return "Mục đích: Khen ngợi thành tích xuất sắc hoặc sự nỗ lực vượt bậc của học sinh.";
-    case 'homework':
-      return "Mục đích: Nhắc nhở về tình hình làm bài tập về nhà, nhưng theo cách nhẹ nhàng và cùng tìm giải pháp.";
-    case 'meeting':
-      return "Mục đích: Trân trọng mời phụ huynh tham gia cuộc họp hoặc buổi gặp mặt trao đổi.";
-    case 'event':
-      return "Mục đích: Thông báo về sự kiện sắp tới của lớp/trường và khuyến khích học sinh tham gia.";
-    case 'other':
-      return `Mục đích: ${custom || 'Viết email theo yêu cầu cụ thể của giáo viên.'}`;
-    case 'general':
-    default:
-      return "Mục đích: Thông báo tổng hợp tình hình học tập và rèn luyện định kỳ.";
-  }
+    switch (scenario) {
+        case 'achievement':
+            return "Mục đích: Khen ngợi thành tích xuất sắc hoặc sự nỗ lực vượt bậc của học sinh.";
+        case 'homework':
+            return "Mục đích: Nhắc nhở về tình hình làm bài tập về nhà, nhưng theo cách nhẹ nhàng và cùng tìm giải pháp.";
+        case 'meeting':
+            return "Mục đích: Trân trọng mời phụ huynh tham gia cuộc họp hoặc buổi gặp mặt trao đổi.";
+        case 'event':
+            return "Mục đích: Thông báo về sự kiện sắp tới của lớp/trường và khuyến khích học sinh tham gia.";
+        case 'other':
+            return `Mục đích: ${custom || 'Viết email theo yêu cầu cụ thể của giáo viên.'}`;
+        case 'general':
+        default:
+            return "Mục đích: Thông báo tổng hợp tình hình học tập và rèn luyện định kỳ.";
+    }
 };
 
 const getEducationLevelContext = (grade?: string): string => {
     if (!grade) return "";
-    
+
     // Handle Preschool case
     if (grade === "MamNon") {
         return "Đối tượng: Phụ huynh MẦM NON (3-5 tuổi). Lưu ý: Giọng văn cực kỳ ân cần, chi tiết về ăn ngủ, sức khỏe. Dùng nhiều icon dễ thương (bông hoa, mặt trời, trái tim).";
@@ -186,26 +186,26 @@ const getEducationLevelContext = (grade?: string): string => {
 };
 
 export const generateEmailContent = async (
-    student: Student, 
-    config: GenerationConfig, 
-    apiKey: string, 
+    student: Student,
+    config: GenerationConfig,
+    apiKey: string,
     model: AIModelId,
     teacherName?: string,
     teacherTitle?: string
 ): Promise<GeneratedEmail> => {
-  const toneInstruction = getToneInstruction(config.tone, config.customTone);
-  const scenarioInstruction = getScenarioInstruction(config.scenario, config.customScenario);
-  const educationContext = getEducationLevelContext(student.grade);
-  
-  const senderInfo = (teacherName && teacherTitle) ? `${teacherTitle} ${teacherName}` : "Giáo viên chủ nhiệm";
+    const toneInstruction = getToneInstruction(config.tone, config.customTone);
+    const scenarioInstruction = getScenarioInstruction(config.scenario, config.customScenario);
+    const educationContext = getEducationLevelContext(student.grade);
 
-  const scoreInfo = student.examType 
-    ? `Kỳ thi: ${student.examType}. Điểm số: ${student.score || 'Chưa cập nhật'}`
-    : `Điểm số/Học lực: ${student.score || 'Không có dữ liệu cụ thể'}`;
+    const senderInfo = (teacherName && teacherTitle) ? `${teacherTitle} ${teacherName}` : "Giáo viên chủ nhiệm";
 
-  const classInfo = student.className ? `Lớp: ${student.className}` : (student.grade ? `Khối: ${student.grade}` : "");
+    const scoreInfo = student.examType
+        ? `Kỳ thi: ${student.examType}. Điểm số: ${student.score || 'Chưa cập nhật'}`
+        : `Điểm số/Học lực: ${student.score || 'Không có dữ liệu cụ thể'}`;
 
-  const SYSTEM_INSTRUCTION = `
+    const classInfo = student.className ? `Lớp: ${student.className}` : (student.grade ? `Khối: ${student.grade}` : "");
+
+    const SYSTEM_INSTRUCTION = `
 Bạn là một giáo viên chủ nhiệm tận tâm (${senderInfo}). Nhiệm vụ của bạn là viết email gửi phụ huynh.
 CẤU HÌNH: ${toneInstruction} | ${scenarioInstruction} | ${educationContext}
 QUY TẮC: 
@@ -214,7 +214,7 @@ QUY TẮC:
 3. Kết thúc bằng lời chúc và ký tên: "${senderInfo}".
 `;
 
-  const prompt = `
+    const prompt = `
     Thông tin học sinh:
     - Tên: ${student.name}
     - ${classInfo}
@@ -226,38 +226,38 @@ QUY TẮC:
     Hãy viết email hoàn chỉnh (Tiêu đề và Nội dung).
   `;
 
-  return callGeminiWithFallback(apiKey, model, async (ai, currentModel) => {
-      const response = await ai.models.generateContent({
-        model: currentModel,
-        contents: prompt,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              subject: { type: Type.STRING },
-              body: { type: Type.STRING },
+    return callGeminiWithFallback(apiKey, model, async (ai, currentModel) => {
+        const response = await ai.models.generateContent({
+            model: currentModel,
+            contents: prompt,
+            config: {
+                systemInstruction: SYSTEM_INSTRUCTION,
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        subject: { type: Type.STRING },
+                        body: { type: Type.STRING },
+                    },
+                    required: ["subject", "body"],
+                },
             },
-            required: ["subject", "body"],
-          },
-        },
-      });
+        });
 
-      const jsonText = response.text;
-      if (!jsonText) throw new Error("Empty response");
-      const result = JSON.parse(jsonText);
-      return {
-        studentId: student.id,
-        subject: result.subject,
-        body: result.body,
-      };
-  });
+        const jsonText = response.text;
+        if (!jsonText) throw new Error("Empty response");
+        const result = JSON.parse(jsonText);
+        return {
+            studentId: student.id,
+            subject: result.subject,
+            body: result.body,
+        };
+    });
 };
 
 export const generateZaloContent = async (
-    config: ZaloConfig, 
-    apiKey: string, 
+    config: ZaloConfig,
+    apiKey: string,
     model: AIModelId,
     teacherName?: string,
     teacherTitle?: string
@@ -304,7 +304,7 @@ MỤC ĐÍCH: ${config.topic === 'other' ? 'Thông báo tự chọn' : config.to
         const jsonText = response.text;
         if (!jsonText) throw new Error("No response");
         const result = JSON.parse(jsonText);
-        
+
         return {
             studentId: 'group',
             subject: result.subject,
@@ -329,16 +329,16 @@ export const generateZaloTemplate = async (topicDescription: string, apiKey: str
 }
 
 export const generateStudentReport = async (
-    student: Student, 
-    config: GenerationConfig, 
-    apiKey: string, 
+    student: Student,
+    config: GenerationConfig,
+    apiKey: string,
     model: AIModelId,
     teacherName?: string,
     teacherTitle?: string
 ): Promise<string> => {
     const toneInstruction = getToneInstruction(config.tone, config.customTone);
     const senderInfo = (teacherName && teacherTitle) ? `${teacherTitle} ${teacherName}` : "GVCN";
-    
+
     const SYSTEM_INSTRUCTION = `
     Bạn là ${senderInfo} - GVCN lớp. Viết nhận xét học sinh theo cấu trúc 4 phần (Khen ngợi 30%, Phân tích 40%, Gợi ý 20%, Động viên 10%).
     Định dạng: BẮT BUỘC xuống dòng (\n) giữa các phần. Không viết thành 1 khối.
@@ -450,8 +450,8 @@ export const generateSolutionForStudent = async (
     model: AIModelId,
     interactionType: 'reward' | 'violation' | 'other' = 'other'
 ): Promise<string> => {
-    
-    const contextInstruction = interactionType === 'reward' 
+
+    const contextInstruction = interactionType === 'reward'
         ? "NGỮ CẢNH: GIÁO VIÊN MUỐN KHEN THƯỞNG/ĐỘNG VIÊN HỌC SINH. Hãy đề xuất các hình thức khen thưởng ý nghĩa, tạo động lực dựa trên tính cách."
         : "NGỮ CẢNH: HỌC SINH CÓ HÀNH VI VI PHẠM/CẦN UỐN NẮN. Hãy đề xuất biện pháp kỷ luật tích cực, giúp học sinh nhận ra lỗi sai mà không bị tổn thương.";
 
@@ -564,7 +564,7 @@ export const generateSeatingArrangementSuggestion = async (
     model: AIModelId,
     strategyType: string
 ): Promise<string> => {
-     const SYSTEM_INSTRUCTION = `
+    const SYSTEM_INSTRUCTION = `
     Bạn là chuyên gia sắp xếp lớp học.
     Nhiệm vụ: Gợi ý sơ đồ chỗ ngồi dựa trên danh sách học sinh và chiến lược được chọn.
     
@@ -740,12 +740,12 @@ export const suggestQuickNoteContent = async (
         const response = await ai.models.generateContent({
             model: currentModel,
             contents: prompt,
-            config: { 
+            config: {
                 systemInstruction: SYSTEM_INSTRUCTION,
-                responseMimeType: "application/json" 
+                responseMimeType: "application/json"
             }
         });
-        
+
         const jsonText = response.text || "[]";
         try {
             const arr = JSON.parse(jsonText);
@@ -804,37 +804,53 @@ export const generateClassReportAssessment = async (
 }
 
 export const extractStudentListFromFiles = async (
-    fileData: string, 
+    fileData: string,
     mimeType: string,
-    apiKey: string, 
+    apiKey: string,
     model: AIModelId
 ): Promise<Student[]> => {
     const SYSTEM_INSTRUCTION = `
-    Trích xuất danh sách học sinh từ file (Excel/PDF/Image).
+    Bạn là chuyên gia trích xuất dữ liệu học sinh từ file.
     
-    Output JSON Array với các trường sau:
-    - name (String): Họ và tên
-    - dob (String): Ngày sinh (dd/mm/yyyy)
-    - className (String): Lớp
-    - averageScore (Number): Điểm trung bình môn (nếu có cột TB, TBHK, TBC...)
-    - conduct (String): Hạnh kiểm (Tốt, Khá, TB, Yếu)
-    - absenceCount (Number): Số ngày nghỉ (có phép + không phép)
-    - violationCount (Number): Số lần vi phạm/lỗi
-    - achievements (Array String): Các thành tích/khen thưởng (nếu có)
-    - detailedScores (Object): Điểm các môn (Toán, Văn, Anh...)
+    NHIỆM VỤ: Đọc file và trích xuất TẤT CẢ thông tin học sinh có trong file.
     
-    Nếu không có dữ liệu, hãy để trống hoặc null.
+    NGUYÊN TẮC QUAN TRỌNG:
+    - KHÔNG yêu cầu file có định dạng cụ thể
+    - Trích xuất BẤT KỲ thông tin nào có sẵn trong file
+    - Nếu thiếu thông tin nào, ĐỂ TRỐNG (empty string "") hoặc null
+    - Chỉ cần có TÊN học sinh là đủ để tạo record
+    - Tìm kiếm linh hoạt: "Họ tên", "Họ và tên", "Tên", "Name", "Tên học sinh", "STT"...
+    
+    Output JSON Array với các trường (để trống nếu không có):
+    - name (String): Họ và tên - tìm từ cột chứa tên người
+    - dob (String): Ngày sinh (dd/mm/yyyy) - nếu có
+    - className (String): Lớp - nếu có
+    - averageScore (Number): Điểm trung bình - nếu có
+    - conduct (String): Hạnh kiểm - nếu có
+    - absenceCount (Number): Số ngày nghỉ - nếu có
+    - violationCount (Number): Số vi phạm - nếu có
+    - achievements (Array String): Thành tích - nếu có
+    - detailedScores (Object): Điểm các môn - nếu có
+    
+    VÍ DỤ file chỉ có cột "Họ tên" và "Lớp":
+    [{"name": "Nguyễn Văn A", "className": "10A1", "dob": "", "averageScore": null}]
+    
+    Trả về JSON Array, KHÔNG có text giải thích.
     `;
 
     const parts = [];
     if (mimeType === 'text/csv' || mimeType === 'text/plain') {
-        parts.push({ text: fileData });
+        parts.push({ text: "Đây là dữ liệu từ file. Hãy trích xuất danh sách học sinh (lấy thông tin có sẵn, thiếu thì để trống):\n\n" + fileData });
     } else {
         parts.push({ inlineData: { mimeType: mimeType, data: fileData } });
-        parts.push({ text: "Trích xuất danh sách học sinh." });
+        parts.push({ text: "Trích xuất danh sách học sinh từ file này. Lấy mọi thông tin có sẵn, thiếu thì để trống." });
     }
 
     return callGeminiWithFallback(apiKey, model, async (ai, currentModel) => {
+        console.log("[extractStudentListFromFiles] Calling AI with model:", currentModel);
+        console.log("[extractStudentListFromFiles] MimeType:", mimeType);
+        console.log("[extractStudentListFromFiles] Data length:", fileData?.length || 0);
+
         const response = await ai.models.generateContent({
             model: currentModel,
             contents: { parts },
@@ -843,15 +859,43 @@ export const extractStudentListFromFiles = async (
                 responseMimeType: "application/json"
             }
         });
-        
+
         const jsonText = response.text;
-        if (!jsonText) throw new Error("Empty response");
-        const cleanJson = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const data = JSON.parse(cleanJson);
-        
+        console.log("[extractStudentListFromFiles] Raw response:", jsonText?.substring(0, 500));
+
+        if (!jsonText || jsonText.trim().length === 0) {
+            throw new Error("AI không trả về dữ liệu. Vui lòng thử lại hoặc kiểm tra API Key.");
+        }
+
+        // Clean JSON response
+        let cleanJson = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        // Try to extract JSON array if wrapped in other text
+        const jsonMatch = cleanJson.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+            cleanJson = jsonMatch[0];
+        }
+
+        let data;
+        try {
+            data = JSON.parse(cleanJson);
+        } catch (parseError) {
+            console.error("[extractStudentListFromFiles] JSON parse error:", parseError);
+            console.error("[extractStudentListFromFiles] Attempted to parse:", cleanJson?.substring(0, 500));
+            throw new Error("Lỗi phân tích dữ liệu từ AI. File có thể không đúng định dạng hoặc AI trả về kết quả không hợp lệ.");
+        }
+
+        // Validate data is an array
+        if (!Array.isArray(data)) {
+            console.error("[extractStudentListFromFiles] Data is not an array:", typeof data);
+            throw new Error("Dữ liệu trả về không đúng định dạng mảng. Vui lòng kiểm tra file.");
+        }
+
+        console.log("[extractStudentListFromFiles] Extracted students count:", data.length);
+
         return data.map((item: any, idx: number) => ({
             id: `extracted-${idx}-${Date.now()}`,
-            name: item.name || `Học sinh ${idx+1}`,
+            name: item.name || `Học sinh ${idx + 1}`,
             className: item.className || '',
             dob: item.dob || '',
             detailedScores: item.detailedScores || {},
@@ -880,9 +924,9 @@ export const exportStudentAnalysesToDocx = async (
         const doc = parser.parseFromString(html, 'text/html');
         // The prompt asks for <div class="... analysis-card">...</div> but sometimes AI might miss classes.
         // We look for divs that likely contain the content.
-        const cards = Array.from(doc.querySelectorAll('div')); 
-        
-        const extractedItems: {title: string, content: string}[] = [];
+        const cards = Array.from(doc.querySelectorAll('div'));
+
+        const extractedItems: { title: string, content: string }[] = [];
 
         cards.forEach(card => {
             // Try to find title and content based on common structure or specific classes if present
@@ -890,20 +934,20 @@ export const exportStudentAnalysesToDocx = async (
             // OR look for our specific requested classes
             let titleEl = card.querySelector('.card-title') || card.querySelector('.font-bold');
             let contentEl = card.querySelector('.card-content') || card.querySelector('.text-slate-600');
-            
+
             // Heuristic fallback if classes are missing:
             // If a div has exactly 2 children divs, first is title, second is content
             if (!titleEl && !contentEl && card.children.length >= 2) {
-                 titleEl = card.children[0];
-                 contentEl = card.children[1];
+                titleEl = card.children[0];
+                contentEl = card.children[1];
             }
 
             if (titleEl && contentEl) {
                 const title = titleEl.textContent?.trim() || "Mục phân tích";
                 const content = contentEl.textContent?.trim() || "";
-                
+
                 // Avoid duplicates or nested divs picking up same content
-                if(content.length > 10 && !extractedItems.some(i => i.title === title)) {
+                if (content.length > 10 && !extractedItems.some(i => i.title === title)) {
                     extractedItems.push({ title, content });
                 }
             }
@@ -912,13 +956,13 @@ export const exportStudentAnalysesToDocx = async (
         return extractedItems;
     };
 
-    const createStudentTable = (student: Student, analysisItems: {title: string, content: string}[]) => {
+    const createStudentTable = (student: Student, analysisItems: { title: string, content: string }[]) => {
         // Create rows for the table. Since it's 2 columns, we pair items.
         const dataRows: TableRow[] = [];
-        
+
         for (let i = 0; i < analysisItems.length; i += 2) {
             const item1 = analysisItems[i];
-            const item2 = analysisItems[i+1];
+            const item2 = analysisItems[i + 1];
 
             const cells = [
                 // Cell 1
@@ -958,7 +1002,7 @@ export const exportStudentAnalysesToDocx = async (
                         ],
                         width: { size: 50, type: WidthType.PERCENTAGE },
                         margins: { top: 150, bottom: 150, left: 150, right: 150 },
-                         borders: {
+                        borders: {
                             top: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
                             bottom: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
                             left: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
@@ -967,8 +1011,8 @@ export const exportStudentAnalysesToDocx = async (
                     })
                 );
             } else {
-                 // Empty cell filler if odd number of items
-                 cells.push(new TableCell({ children: [], width: { size: 50, type: WidthType.PERCENTAGE }}));
+                // Empty cell filler if odd number of items
+                cells.push(new TableCell({ children: [], width: { size: 50, type: WidthType.PERCENTAGE } }));
             }
 
             dataRows.push(new TableRow({ children: cells }));
@@ -1017,9 +1061,9 @@ export const exportStudentAnalysesToDocx = async (
             spacing: { before: 400, after: 200 }
         }),
         new Paragraph({
-             children: [new TextRun({ text: `LỚP: ${className.toUpperCase()}`, bold: true, size: 28, color: "333333" })],
-             alignment: AlignmentType.CENTER,
-             spacing: { after: 800 }
+            children: [new TextRun({ text: `LỚP: ${className.toUpperCase()}`, bold: true, size: 28, color: "333333" })],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 800 }
         })
     );
 
@@ -1058,17 +1102,17 @@ export const exportSolutionToDocx = async (
 ) => {
     // Parse Markdown bolding simply
     const paragraphs = solution.split('\n').map(line => {
-        const parts = line.split(/(\*\*.*?\*\*)/g); 
+        const parts = line.split(/(\*\*.*?\*\*)/g);
         const children = parts.map(part => {
             if (part.startsWith('**') && part.endsWith('**')) {
                 return new TextRun({ text: part.replace(/\*\*/g, ''), bold: true });
             }
             return new TextRun({ text: part });
         });
-        
+
         return new Paragraph({
             children: children,
-            spacing: { after: 120 } 
+            spacing: { after: 120 }
         });
     });
 
@@ -1088,7 +1132,7 @@ export const exportSolutionToDocx = async (
                     ],
                     spacing: { after: 200 }
                 }),
-                 new Paragraph({
+                new Paragraph({
                     children: [
                         new TextRun({ text: "Vấn đề cần xử lý: ", bold: true, color: "C00000" }),
                         new TextRun({ text: problem, italics: true })
@@ -1141,7 +1185,7 @@ export const exportZaloToDocx = async (title: string, content: string) => {
     const paragraphs = content.split('\n').map(line => {
         return new Paragraph({
             children: [new TextRun({ text: line })],
-            spacing: { after: 120 } 
+            spacing: { after: 120 }
         });
     });
 
@@ -1154,7 +1198,7 @@ export const exportZaloToDocx = async (title: string, content: string) => {
                     alignment: AlignmentType.CENTER,
                     spacing: { after: 400 }
                 }),
-                 new Paragraph({
+                new Paragraph({
                     children: [
                         new TextRun({ text: "Chủ đề: ", bold: true }),
                         new TextRun({ text: title, italics: true })
@@ -1187,6 +1231,6 @@ export const exportZaloToDocx = async (title: string, content: string) => {
     });
 
     Packer.toBlob(doc).then(blob => {
-        saveAs(blob, `Tin_Nhan_Zalo_${new Date().toISOString().slice(0,10)}.docx`);
+        saveAs(blob, `Tin_Nhan_Zalo_${new Date().toISOString().slice(0, 10)}.docx`);
     });
 }
