@@ -6,7 +6,7 @@
 
 export const ACCOUNTS = [
     { username: "GVCN", password: "12345", fullName: "Giáo Viên Chủ Nhiệm", expiry: "2026-05-25" },
-    { username: "giaovienai", password: "Vip123#", fullName: "Ms Ly AI", expiry: "VIP" },
+    { username: "giaovienai", password: "Vip123456@", fullName: "Ms Ly AI", expiry: "VIP" },
     { username: "VoThiThuHang", password: "12345", fullName: "Võ Thị Thu Hằng", expiry: "VIP" },
     { username: "0962299897", password: "12345", fullName: "Thầy Nguyễn Đức Mạnh", expiry: "VIP" },
     { username: "0913499938", password: "12345", fullName: "Nguyễn Minh Trường", expiry: "VIP" },
